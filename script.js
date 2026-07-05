@@ -24,42 +24,90 @@ const timeline = document.querySelector('.process-timeline');
 if (timeline) {
   const steps = [...timeline.querySelectorAll('.process-step')];
   const progressPaths = [...timeline.querySelectorAll('.river-reveal-path')];
-  const milestones = [...timeline.querySelectorAll('.river-milestones span')];
+  const milestones = [...timeline.querySelectorAll('.step-dot')];
   const thresholds = [0.10, 0.28, 0.46, 0.68, 0.86];
+  const cornerClasses = ['dot-top-left', 'dot-top-right', 'dot-bottom-left', 'dot-bottom-right'];
+  let revealStops = [...thresholds];
   let ticking = false;
 
   const getVisiblePath = () => progressPaths.find((path) => {
-    const svg = path.closest('svg');
-    return window.getComputedStyle(svg).display !== 'none';
+    return getComputedStyle(path.closest('svg')).display !== 'none';
   });
 
-  const positionMilestones = () => {
+  const syncDotsWithRiver = () => {
+    const width = window.innerWidth;
+    const corners = width < 768
+      ? ['dot-top-left', 'dot-top-right', 'dot-top-right', 'dot-top-left', 'dot-bottom-left']
+      : width < 1024
+        ? ['dot-bottom-right', 'dot-top-right', 'dot-bottom-right', 'dot-bottom-left', 'dot-bottom-left']
+        : ['dot-bottom-right', 'dot-bottom-right', 'dot-bottom-right', 'dot-bottom-left', 'dot-bottom-right'];
+
+    milestones.forEach((dot, index) => {
+      dot.classList.remove(...cornerClasses);
+      dot.classList.add(corners[index]);
+    });
+
     const path = getVisiblePath();
     if (!path) return;
-    const length = path.getTotalLength();
+    const timelineRect = timeline.getBoundingClientRect();
     const viewBox = path.closest('svg').viewBox.baseVal;
-    milestones.forEach((milestone, index) => {
-      const point = path.getPointAtLength(length * thresholds[index]);
-      milestone.style.left = `${(point.x / viewBox.width) * 100}%`;
-      milestone.style.top = `${(point.y / viewBox.height) * 100}%`;
+    const pathLength = path.getTotalLength();
+    let previousStop = 0;
+
+    revealStops = milestones.map((dot, index) => {
+      if (index === milestones.length - 1) return 1;
+      const dotRect = dot.getBoundingClientRect();
+      const dotX = dotRect.left + dotRect.width / 2 - timelineRect.left;
+      const dotY = dotRect.top + dotRect.height / 2 - timelineRect.top;
+      let nearestStop = previousStop;
+      let nearestDistance = Infinity;
+
+      for (let sample = 0; sample <= 600; sample += 1) {
+        const fraction = sample / 600;
+        if (fraction <= previousStop + 0.015) continue;
+        const point = path.getPointAtLength(pathLength * fraction);
+        const x = point.x / viewBox.width * timelineRect.width;
+        const y = point.y / viewBox.height * timelineRect.height;
+        const distance = Math.hypot(x - dotX, y - dotY);
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestStop = fraction;
+        }
+      }
+
+      previousStop = nearestStop;
+      return nearestStop;
     });
+
+    if (width >= 1024) {
+      revealStops[3] = 0.8;
+    }
   };
 
   const updateTimeline = () => {
-    const rect = timeline.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
-    const animationDistance = rect.height + viewportHeight * 0.5;
-    const travelled = viewportHeight * 0.75 - rect.top;
-    const progress = Math.max(0, Math.min(1, travelled / animationDistance));
+    const activationLine = viewportHeight * 0.68;
+    let activeIndex = -1;
+    milestones.forEach((milestone, index) => {
+      const dot = milestone.getBoundingClientRect();
+      if (dot.top + dot.height / 2 <= activationLine) activeIndex = index;
+    });
+    // Khi tới mốc cuối, reveal toàn bộ ảnh thay vì dừng tại 86% path.
+    const progress = activeIndex === thresholds.length - 1
+      ? 1
+      : activeIndex >= 0
+        ? revealStops[activeIndex]
+        : 0;
 
     timeline.style.setProperty('--timeline-progress', `${progress * 100}%`);
+    timeline.dataset.activeStep = String(activeIndex + 1);
     progressPaths.forEach((path) => {
       const length = path.getTotalLength();
       path.style.strokeDasharray = `${length} ${length}`;
       path.style.strokeDashoffset = String(length * (1 - progress));
     });
     steps.forEach((step, index) => {
-      const active = progress >= thresholds[index];
+      const active = index <= activeIndex;
       step.classList.toggle('active', active);
       step.classList.toggle('is-active', active);
       milestones[index].classList.toggle('active', active);
@@ -74,11 +122,11 @@ if (timeline) {
     }
   };
 
-  positionMilestones();
+  syncDotsWithRiver();
   updateTimeline();
   window.addEventListener('scroll', requestTimelineUpdate, { passive: true });
   window.addEventListener('resize', () => {
-    positionMilestones();
+    syncDotsWithRiver();
     requestTimelineUpdate();
   });
 }
