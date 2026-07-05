@@ -11,7 +11,74 @@ document.getElementById('consult-form').addEventListener('submit', (event) => {
   event.currentTarget.reset();
 });
 
-document.querySelector('.newsletter form').addEventListener('submit', (event) => {
-  event.preventDefault();
-  event.currentTarget.reset();
-});
+const newsletterForm = document.querySelector('.newsletter form');
+if (newsletterForm) {
+  newsletterForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    event.currentTarget.reset();
+  });
+}
+
+const timeline = document.querySelector('.process-timeline');
+
+if (timeline) {
+  const steps = [...timeline.querySelectorAll('.process-step')];
+  const progressPaths = [...timeline.querySelectorAll('.river-reveal-path')];
+  const milestones = [...timeline.querySelectorAll('.river-milestones span')];
+  const thresholds = [0.10, 0.28, 0.46, 0.68, 0.86];
+  let ticking = false;
+
+  const getVisiblePath = () => progressPaths.find((path) => {
+    const svg = path.closest('svg');
+    return window.getComputedStyle(svg).display !== 'none';
+  });
+
+  const positionMilestones = () => {
+    const path = getVisiblePath();
+    if (!path) return;
+    const length = path.getTotalLength();
+    const viewBox = path.closest('svg').viewBox.baseVal;
+    milestones.forEach((milestone, index) => {
+      const point = path.getPointAtLength(length * thresholds[index]);
+      milestone.style.left = `${(point.x / viewBox.width) * 100}%`;
+      milestone.style.top = `${(point.y / viewBox.height) * 100}%`;
+    });
+  };
+
+  const updateTimeline = () => {
+    const rect = timeline.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const animationDistance = rect.height + viewportHeight * 0.5;
+    const travelled = viewportHeight * 0.75 - rect.top;
+    const progress = Math.max(0, Math.min(1, travelled / animationDistance));
+
+    timeline.style.setProperty('--timeline-progress', `${progress * 100}%`);
+    progressPaths.forEach((path) => {
+      const length = path.getTotalLength();
+      path.style.strokeDasharray = `${length} ${length}`;
+      path.style.strokeDashoffset = String(length * (1 - progress));
+    });
+    steps.forEach((step, index) => {
+      const active = progress >= thresholds[index];
+      step.classList.toggle('active', active);
+      step.classList.toggle('is-active', active);
+      milestones[index].classList.toggle('active', active);
+    });
+    ticking = false;
+  };
+
+  const requestTimelineUpdate = () => {
+    if (!ticking) {
+      ticking = true;
+      window.requestAnimationFrame(updateTimeline);
+    }
+  };
+
+  positionMilestones();
+  updateTimeline();
+  window.addEventListener('scroll', requestTimelineUpdate, { passive: true });
+  window.addEventListener('resize', () => {
+    positionMilestones();
+    requestTimelineUpdate();
+  });
+}
