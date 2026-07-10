@@ -88,6 +88,10 @@ img {
     stroke-linejoin: round
 }
 
+.top-bar span {
+    min-width: 0
+}
+
 .hero picture,
 .hero img {
     width: 100%
@@ -1321,17 +1325,27 @@ img {
     }
 
     .top-bar-inner {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 6px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 7px;
         min-height: auto;
-        padding-block: 10px
+        padding-block: 9px
     }
 
     .top-bar a {
+        width: 100%;
         max-width: 100%;
-        white-space: normal;
-        overflow-wrap: anywhere
+        min-height: 34px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, .12);
+        white-space: nowrap
+    }
+
+    .top-bar span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap
     }
 
     .testimonial-grid,
