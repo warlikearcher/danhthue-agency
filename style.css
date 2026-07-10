@@ -57,13 +57,14 @@ img {
     background: linear-gradient(90deg, var(--deep), var(--blue));
     color: #fff;
     font-size: 14px;
-    font-weight: 700
+    font-weight: 700;
+    text-align: center
 }
 
 .top-bar-inner {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 24px;
     min-height: 42px;
     padding-block: 8px
@@ -72,8 +73,10 @@ img {
 .top-bar a {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     min-width: 0;
+    line-height: 1.2;
     white-space: nowrap
 }
 
@@ -287,16 +290,14 @@ img {
     font-size: 18px
 }
 
+.socials svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor
+}
+
 .socials a:nth-child(2) {
-    background: #f23b75
-}
-
-.socials a:nth-child(3) {
     background: #111
-}
-
-.socials a:nth-child(4) {
-    background: #f11919
 }
 
 .reasons {
@@ -560,19 +561,72 @@ img {
     border-left: 1px solid #cbd1d8
 }
 
-.to-top {
+.floating-actions {
     position: fixed;
     right: 32px;
     bottom: 26px;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px
+}
+
+.floating-action {
     width: 48px;
     height: 48px;
-    display: grid;
-    place-items: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     background: var(--blue);
     color: #fff;
     border-radius: 50%;
-    font-size: 25px;
+    font-size: 20px;
+    font-weight: 800;
     box-shadow: 0 6px 20px rgba(0, 91, 240, .3)
+}
+
+.floating-action b {
+    display: none;
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap
+}
+
+.call-action,
+.zalo-action {
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: 50%
+}
+
+.call-action b,
+.zalo-action b {
+    display: none
+}
+
+.zalo-action {
+    background: #0068ff
+}
+
+.zalo-action span {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 20px;
+    border-radius: 6px;
+    background: #fff;
+    color: #0068ff;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: -.2px
+}
+
+.to-top {
+    font-size: 25px
 }
 
 :focus-visible {
@@ -783,11 +837,28 @@ img {
         gap: 12px
     }
 
-    .to-top {
-        width: 42px;
-        height: 42px;
+    .floating-actions {
         right: 16px;
-        bottom: 16px
+        bottom: 16px;
+        gap: 8px
+    }
+
+    .floating-action {
+        width: 42px;
+        height: 42px
+    }
+
+    .call-action,
+    .zalo-action {
+        min-width: 42px;
+        width: 42px;
+        padding: 0;
+        border-radius: 50%
+    }
+
+    .call-action b,
+    .zalo-action b {
+        display: none
     }
 
     .hero img {
@@ -1339,6 +1410,7 @@ img {
         padding: 6px 10px;
         border-radius: 8px;
         background: rgba(255, 255, 255, .12);
+        text-align: center;
         white-space: nowrap
     }
 
@@ -1913,4 +1985,20 @@ img {
     height: 60vh;
     object-fit: cover;
     object-position: center;
+}
+
+
+
+.call-action::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  background-color: white;
+
+  -webkit-mask: url("./img/icon/icons-phone-50.svg") center / contain no-repeat;
+  mask: url("./img/icon/icons-phone-50.svg") center / contain no-repeat;
+}
+
+.call-action:hover::before {
+  background-color: yellow;
 }
