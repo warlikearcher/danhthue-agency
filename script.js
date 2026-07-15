@@ -1,46 +1,89 @@
-document.querySelectorAll('input[name="name"]').forEach((input) => input.placeholder = 'Họ và tên *');
-document.querySelectorAll('input[name="phone"]').forEach((input) => input.placeholder = 'Số điện thoại *');
-document.querySelectorAll('input[name="email"]').forEach((input) => input.placeholder = 'Email');
-document.querySelectorAll('input[name="company"]').forEach((input) => input.placeholder = 'Doanh nghiệp');
-document.querySelectorAll('textarea[name="message"]').forEach((input) => input.placeholder = 'Nhu cầu của bạn');
+document
+  .querySelectorAll('input[name="name"]')
+  .forEach((input) => {
+    input.placeholder = "Họ và tên *";
+  });
 
-document.getElementById('consult-form').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const status = event.currentTarget.querySelector('.form-status');
-  status.textContent = 'Cảm ơn bạn! Yêu cầu tư vấn đã được ghi nhận.';
-  event.currentTarget.reset();
-});
+document
+  .querySelectorAll('input[name="phone"]')
+  .forEach((input) => {
+    input.placeholder = "Số điện thoại *";
+  });
 
-const newsletterForm = document.querySelector('.newsletter form');
+document
+  .querySelectorAll('input[name="email"]')
+  .forEach((input) => {
+    input.placeholder = "Email";
+  });
+
+document
+  .querySelectorAll('input[name="company"]')
+  .forEach((input) => {
+    input.placeholder = "Doanh nghiệp";
+  });
+
+document
+  .querySelectorAll('textarea[name="message"]')
+  .forEach((input) => {
+    input.placeholder = "Nhu cầu của bạn";
+  });
+
+
+const newsletterForm = document.querySelector(".newsletter form");
 if (newsletterForm) {
-  newsletterForm.addEventListener('submit', (event) => {
+  newsletterForm.addEventListener("submit", (event) => {
     event.preventDefault();
     event.currentTarget.reset();
   });
 }
 
-const timeline = document.querySelector('.process-timeline');
+const timeline = document.querySelector(".process-timeline");
 
 if (timeline) {
-  const steps = [...timeline.querySelectorAll('.process-step')];
-  const progressPaths = [...timeline.querySelectorAll('.river-reveal-path')];
-  const milestones = [...timeline.querySelectorAll('.step-dot')];
-  const thresholds = [0.10, 0.28, 0.46, 0.68, 0.86];
-  const cornerClasses = ['dot-top-left', 'dot-top-right', 'dot-bottom-left', 'dot-bottom-right'];
+  const steps = [...timeline.querySelectorAll(".process-step")];
+  const progressPaths = [...timeline.querySelectorAll(".river-reveal-path")];
+  const milestones = [...timeline.querySelectorAll(".step-dot")];
+  const thresholds = [0.1, 0.28, 0.46, 0.68, 0.86];
+  const cornerClasses = [
+    "dot-top-left",
+    "dot-top-right",
+    "dot-bottom-left",
+    "dot-bottom-right",
+  ];
   let revealStops = [...thresholds];
   let ticking = false;
 
-  const getVisiblePath = () => progressPaths.find((path) => {
-    return getComputedStyle(path.closest('svg')).display !== 'none';
-  });
+  const getVisiblePath = () =>
+    progressPaths.find((path) => {
+      return getComputedStyle(path.closest("svg")).display !== "none";
+    });
 
   const syncDotsWithRiver = () => {
     const width = window.innerWidth;
-    const corners = width < 768
-      ? ['dot-top-left', 'dot-top-right', 'dot-top-right', 'dot-top-left', 'dot-bottom-left']
-      : width < 1024
-        ? ['dot-bottom-right', 'dot-top-right', 'dot-bottom-right', 'dot-bottom-left', 'dot-bottom-left']
-        : ['dot-bottom-right', 'dot-bottom-right', 'dot-bottom-right', 'dot-bottom-left', 'dot-bottom-right'];
+    const corners =
+      width < 768
+        ? [
+            "dot-top-left",
+            "dot-top-right",
+            "dot-top-right",
+            "dot-top-left",
+            "dot-bottom-left",
+          ]
+        : width < 1024
+          ? [
+              "dot-bottom-right",
+              "dot-top-right",
+              "dot-bottom-right",
+              "dot-bottom-left",
+              "dot-bottom-left",
+            ]
+          : [
+              "dot-bottom-right",
+              "dot-bottom-right",
+              "dot-bottom-right",
+              "dot-bottom-left",
+              "dot-bottom-right",
+            ];
 
     milestones.forEach((dot, index) => {
       dot.classList.remove(...cornerClasses);
@@ -50,7 +93,7 @@ if (timeline) {
     const path = getVisiblePath();
     if (!path) return;
     const timelineRect = timeline.getBoundingClientRect();
-    const viewBox = path.closest('svg').viewBox.baseVal;
+    const viewBox = path.closest("svg").viewBox.baseVal;
     const pathLength = path.getTotalLength();
     let previousStop = 0;
 
@@ -66,8 +109,8 @@ if (timeline) {
         const fraction = sample / 600;
         if (fraction <= previousStop + 0.015) continue;
         const point = path.getPointAtLength(pathLength * fraction);
-        const x = point.x / viewBox.width * timelineRect.width;
-        const y = point.y / viewBox.height * timelineRect.height;
+        const x = (point.x / viewBox.width) * timelineRect.width;
+        const y = (point.y / viewBox.height) * timelineRect.height;
         const distance = Math.hypot(x - dotX, y - dotY);
         if (distance < nearestDistance) {
           nearestDistance = distance;
@@ -92,14 +135,14 @@ if (timeline) {
       const dot = milestone.getBoundingClientRect();
       if (dot.top + dot.height / 2 <= activationLine) activeIndex = index;
     });
-    // Khi tới mốc cuối, reveal toàn bộ ảnh thay vì dừng tại 86% path.
-    const progress = activeIndex === thresholds.length - 1
-      ? 1
-      : activeIndex >= 0
-        ? revealStops[activeIndex]
-        : 0;
+    const progress =
+      activeIndex === thresholds.length - 1
+        ? 1
+        : activeIndex >= 0
+          ? revealStops[activeIndex]
+          : 0;
 
-    timeline.style.setProperty('--timeline-progress', `${progress * 100}%`);
+    timeline.style.setProperty("--timeline-progress", `${progress * 100}%`);
     timeline.dataset.activeStep = String(activeIndex + 1);
     progressPaths.forEach((path) => {
       const length = path.getTotalLength();
@@ -108,9 +151,9 @@ if (timeline) {
     });
     steps.forEach((step, index) => {
       const active = index <= activeIndex;
-      step.classList.toggle('active', active);
-      step.classList.toggle('is-active', active);
-      milestones[index].classList.toggle('active', active);
+      step.classList.toggle("active", active);
+      step.classList.toggle("is-active", active);
+      milestones[index].classList.toggle("active", active);
     });
     ticking = false;
   };
@@ -124,9 +167,80 @@ if (timeline) {
 
   syncDotsWithRiver();
   updateTimeline();
-  window.addEventListener('scroll', requestTimelineUpdate, { passive: true });
-  window.addEventListener('resize', () => {
+  window.addEventListener("scroll", requestTimelineUpdate, { passive: true });
+  window.addEventListener("resize", () => {
     syncDotsWithRiver();
     requestTimelineUpdate();
+  });
+}
+
+const consultForm = document.getElementById("consult-form");
+
+if (consultForm) {
+  const formStatus = consultForm.querySelector(".form-status");
+  const submitButton = consultForm.querySelector(
+    'button[type="submit"]',
+  );
+
+  consultForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    if (!data.name?.trim() || !data.phone?.trim()) {
+      formStatus.textContent =
+        "Vui lòng nhập họ tên và số điện thoại.";
+      return;
+    }
+
+    formStatus.textContent = "Đang gửi yêu cầu...";
+    submitButton.disabled = true;
+    submitButton.textContent = "Đang gửi...";
+
+    try {
+      const response = await fetch(
+        "https://api.web3forms.com/submit",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(data),
+        },
+      );
+
+      const result = await response.json();
+
+      console.log("Web3Forms response:", {
+        status: response.status,
+        result,
+      });
+
+      if (!response.ok || result.success !== true) {
+        throw new Error(
+          result.message ||
+            result.body?.message ||
+            `Web3Forms trả về HTTP ${response.status}`,
+        );
+      }
+
+      formStatus.textContent =
+        "✓ Gửi yêu cầu thành công! Chúng tôi sẽ sớm liên hệ với bạn.";
+
+      form.reset();
+    } catch (error) {
+      console.error("Lỗi gửi Web3Forms:", error);
+
+      formStatus.textContent =
+        "Không gửi được yêu cầu: " + error.message;
+    } finally {
+      submitButton.disabled = false;
+      submitButton.innerHTML =
+        "✈ &nbsp; Gửi yêu cầu tư vấn";
+    }
   });
 }
